@@ -1,9 +1,7 @@
 ﻿D:\Main\Apps\VS IDE\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(519,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
 D:\Main\Apps\VS IDE\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(520,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
   Drawing.cpp
-D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(763,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(764,47): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(765,47): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  JsonHandler.cpp
-  Generating Code...
+D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(747,42): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(748,47): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Drawing.cpp(749,47): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   ImGui Standalone.vcxproj -> D:\Main\Apps\C++ SRC\ImGui\Standalone\ImGui Standalone\Build\ImGui Standalone.exe

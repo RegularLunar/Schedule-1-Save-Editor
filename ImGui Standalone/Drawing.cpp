@@ -14,11 +14,11 @@ LPCSTR Drawing::lpWindowName = "Schedule 1: Save Editor";
 ImVec2 Drawing::vSecondaryWindowSize = {
   500,
   300
-};  
+};
 ImVec2 Drawing::vMainWindowSize = {
   750,
   500
-};  
+};
 ImGuiWindowFlags Drawing::WindowFlags = 2 | 1;
 bool Drawing::bDraw = true;
 void OpenURL(const char* url) {
@@ -26,6 +26,8 @@ void OpenURL(const char* url) {
     ShellExecuteA(nullptr, "open", url, nullptr, nullptr, SW_SHOWNORMAL);
 #endif
 }
+extern ImFont* g_TitleFont;
+extern ImFont* g_RegularFont;
 static int current_window = 0;
 #pragma region Steam Shit
 static char steamIdBuffer[18] = "";
@@ -82,26 +84,6 @@ static SteamIDFormatResult ValidateSteamIDFormat(const char* input) {
         snprintf(const_cast<char*>(input), 18, "%llu", steamId64);
 
         return result;
-    }
-
-    std::regex profileUrlRegex("/profiles/([0-9]+)");
-    std::smatch profileUrlMatch;
-    if (std::regex_search(inputStr, profileUrlMatch, profileUrlRegex)) {
-        std::string steamId64Str = profileUrlMatch[1].str();
-        if (std::regex_match(steamId64Str, std::regex("^765[0-9]{14}$"))) {
-            uint64_t steamId = strtoull(steamId64Str.c_str(), nullptr, 10);
-            const uint64_t MIN_STEAMID64 = 76561197960265728ULL;
-            const uint64_t MAX_STEAMID64 = 76561199999999999ULL;
-
-            if (steamId >= MIN_STEAMID64 && steamId <= MAX_STEAMID64) {
-                result.isValid = true;
-                result.steamId64 = steamId;
-
-                snprintf(const_cast<char*>(input), 18, "%llu", steamId);
-
-                return result;
-            }
-        }
     }
 
     std::regex steamId3Regex("\\[U:([0-9]+):([0-9]+)\\]");
@@ -244,7 +226,7 @@ void DrawConsoleWindow() {
                 std::queue<std::pair<std::string, ImVec4>> tempQueue;
                 {
                     std::lock_guard<std::mutex> lock(consoleMutex);
-                    tempQueue = consoleMessages;        
+                    tempQueue = consoleMessages;
                 }
 
                 while (!tempQueue.empty()) {
@@ -280,11 +262,11 @@ void DrawConsoleWindow() {
                         LogInfo(" github - Opens my Github link");
                         LogInfo(" credits - Me");
                         LogInfo(" ping - pong");
-						LogInfo(" donate - Not needed but is very welcomed!");
-						LogInfo(" kill - Close the save editor entirely");
-						LogInfo(" changeid - Change your Steam ID");
-						LogInfo(" changesave - Change your chosen Save");
-					}
+                        LogInfo(" donate - Not needed but is very welcomed!");
+                        LogInfo(" kill - Close the save editor entirely");
+                        LogInfo(" changeid - Change your Steam ID");
+                        LogInfo(" changesave - Change your chosen Save");
+                    }
                     else if (command == "exit") {
                         showConsole = false;
                     }
@@ -299,33 +281,25 @@ void DrawConsoleWindow() {
                         OpenURL("https://github.com/regularlunar");
                     }
                     else if (command == "credits") {
-						LogInfo("You really thought ther people helped me?");
+                        LogInfo("You really thought ther people helped me?");
                     }
                     else if (command == "changeid") {
                         showConsole = false;
-						current_window = 0;
-						g_debugConsole = false;
+                        current_window = 0;
+                        g_debugConsole = false;
                     }
                     else if (command == "changesave") {
                         showConsole = false;
                         current_window = 1;
                     }
                     else if (command == "kill") {
-                        
+
                     }
-                    
+
                     else if (command == "donate") {
                         LogSuccess("$$$");
-						OpenURL("https://www.ko-fi.com/regularlunar");
+                        OpenURL("https://www.ko-fi.com/regularlunar");
                     }
-                    /*
-                    else if (command == "exit") {
-
-                    }
-                    else if (command == "exit") {
-
-                    }
-                    */
                     else {
                         LogError(":/ Sorry, but thats an unknown command! Try using the command: help");
                     }
@@ -347,7 +321,6 @@ void DrawConsoleWindow() {
     }
 }
 #pragma endregion
-
 
 bool g_AppearanceChkBox = false;
 bool g_CarAppearanceChkBox = false;
@@ -376,7 +349,7 @@ static int selectedSaveGame = 1;
 static int selected_tab = 0;
 
 const char* tab_labels[] = {
-	"Home", "Player", "NPCs", "Customization", "Properties", "DEV DEBUG"
+    "Home", "Player", "NPCs", "Customization", "Properties", "DEV DEBUG"
 };
 
 const char* window_names[] = {
@@ -404,8 +377,11 @@ bool Drawing::isActive() {
     return bDraw == true;
 }
 void DrawSectionHeader(const char* text) {
-    ImGui::SetCursorPosX((ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize(text).x / 2));
+    ImGui::PushFont(g_TitleFont);
+    float textWidth = ImGui::CalcTextSize(text).x;
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() / 2 - textWidth / 2));
     ImGui::Text("%s", text);
+    ImGui::PopFont();
     ImGui::Separator();
     ImGui::Spacing();
     ImGui::Spacing();
@@ -455,7 +431,8 @@ void ApplyChanges() {
     }
 }
 void SaveIDMessage() {
-	ImGui::Separator();
+    ImGui::Separator();
+    float textWidth = ImGui::CalcTextSize("Selected Save: %d").x;
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("Selected Save: %d").x / 2));
     ImGui::Text("Selected Save: %d", selectedSaveGame);
 }
@@ -465,6 +442,7 @@ void Drawing::Draw() {
         DrawConsoleWindow();
         ImGui::SetNextWindowBgAlpha(1.0f);
         ImGui::SetNextWindowBgAlpha(1.0f);
+#pragma region Steam ID Window
         if (current_window == 0) {
             ImGui::SetNextWindowSize(vSecondaryWindowSize, ImGuiCond_Appearing);
             if (ImGui::Begin(window_names[0], &bDraw, WindowFlags)) {
@@ -480,7 +458,7 @@ void Drawing::Draw() {
                 ImGui::BulletText("SteamID64: 76561198012345678");
                 ImGui::BulletText("SteamID: STEAM_0:0:12345678");
                 ImGui::BulletText("SteamID3: [U:1:12345678]");
-                if (ImGui::Button("How to find Steam ID?")) 
+                if (ImGui::Button("How to find Steam ID?"))
                 {
                     OpenURL("https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC");
                 }
@@ -496,6 +474,8 @@ void Drawing::Draw() {
                 ImGui::End();
             }
         }
+#pragma endregion
+#pragma region Save Game Window
         else if (current_window == 1) {
             ImGui::SetNextWindowSize(vSecondaryWindowSize, ImGuiCond_Appearing);
             if (ImGui::Begin(window_names[1], &bDraw, WindowFlags)) {
@@ -520,6 +500,8 @@ void Drawing::Draw() {
                 ImGui::End();
             }
         }
+#pragma endregion
+#pragma region Main Window
         else if (current_window == 2) {
             ImGui::SetNextWindowBgAlpha(1.0f);
             ImGui::SetNextWindowSize(vMainWindowSize, ImGuiCond_Appearing);
@@ -543,12 +525,14 @@ void Drawing::Draw() {
                 {
                     switch (selected_tab) {
                     case 0:
+#pragma region Home
                         DrawSectionHeader("Welcome Home!");
                         ImGui::SetCursorPosX((ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("text").x / 2));
                         ImGui::TextWrapped("");
+#pragma endregion
                         break;
                     case 1:
-                    #pragma region Player
+#pragma region Player
                         DrawSectionHeader("Player Editor");
                         ImGui::Checkbox("Edit Cash/Bank", &g_MoneyChkBox);
                         ImGui::Checkbox("Edit Player Rank", &g_RankChkBox);
@@ -607,7 +591,7 @@ void Drawing::Draw() {
                             ImGui::Text("Edit Bank:");
                             ImGui::InputFloat("Bank Amount", &g_BankAmount);
                         }
-                        SaveIDMessage();
+
                         if (ImGui::Button("Apply Changes")) {
                             std::string steamIdStr(steamIdBuffer);
                             if (g_CashAmount) {
@@ -635,7 +619,7 @@ void Drawing::Draw() {
 #pragma endregion
                         break;
                     case 2:
-                    #pragma region NPCS
+#pragma region NPCS
                         DrawSectionHeader("NPCs");
                         ImGui::Checkbox("Unlock All Dealers", &g_UnlockAllDealer);
                         ImGui::Checkbox("Unlock All Suppliers", &g_UnlockAllSupplier);
@@ -646,7 +630,7 @@ void Drawing::Draw() {
                             ImGui::Text("Relationship Value:");
                             ImGui::SliderFloat("##RelationDelta", &relationDeltaValue, 1.0f, 5.0f, "%.1f");
                         }
-                        SaveIDMessage();
+
                         if (ImGui::Button("Apply Changes")) {
                             std::string steamIdStr(steamIdBuffer);
                             if (g_EditRelationShip) {
@@ -667,17 +651,17 @@ void Drawing::Draw() {
                             ApplyChanges();
                         }
                         StatusMessage();
-                    #pragma endregion
+#pragma endregion
                         break;
                     case 3:
-                    #pragma region Customization
+#pragma region Customization
                         DrawSectionHeader("Colors, Accessories, etc");
                         ImGui::Checkbox("Rename Drugs", &g_DrugNameEditor);
                         ImGui::Checkbox("Drug Color(s)", &g_DrugColorEditor);
                         ImGui::Checkbox("Save Name Changer", &g_SaveNameEditor);
                         ImGui::Checkbox("Player Appearance", &g_AppearanceChkBox);
                         ImGui::Checkbox("Car Colors", &g_CarAppearanceChkBox);
-                        SaveIDMessage();
+
                         if (ImGui::Button("Apply Changes")) {
                             std::string steamIdStr(steamIdBuffer);
                             if (g_EditRelationShip) {
@@ -686,14 +670,14 @@ void Drawing::Draw() {
                             ApplyChanges();
                         }
                         StatusMessage();
-                    #pragma endregion
+#pragma endregion
                         break;
                     case 4:
-                    #pragma region Properties
+#pragma region Properties
                         DrawSectionHeader("Properties");
                         ImGui::Checkbox("Unlock All Properties", &g_UnlockAllMoneyLaunderingProperties);
                         ImGui::Checkbox("Unlock All Businesses", &g_UnlockAllBusinessProperties);
-                        SaveIDMessage();
+
                         if (ImGui::Button("Apply Changes")) {
                             std::string steamIdStr(steamIdBuffer);
                             if (g_UnlockAllMoneyLaunderingProperties) {
@@ -709,10 +693,10 @@ void Drawing::Draw() {
                             ApplyChanges();
                         }
                         StatusMessage();
-                    #pragma endregion
+#pragma endregion
                         break;
                     case 5:
-                    #pragma region Dev Tab
+#pragma region Dev Tab
                         DrawSectionHeader("DEV DEBUG");
                         if (ImGui::Checkbox("Toggle Debug Console", &g_debugConsole)) {
                             showConsole = !showConsole;
@@ -914,9 +898,10 @@ void Drawing::Draw() {
             }
             ImGui::End();
         }
+#pragma endregion
     }
 }
 #ifdef _WINDLL
-    if (GetAsyncKeyState(VK_INSERT) & 1)
-        bDraw = !bDraw;
+if (GetAsyncKeyState(VK_INSERT) & 1)
+bDraw = !bDraw;
 #endif

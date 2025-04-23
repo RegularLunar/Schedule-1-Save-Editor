@@ -8,6 +8,8 @@ IDXGISwapChain* UI::pSwapChain = nullptr;
 ID3D11RenderTargetView* UI::pMainRenderTargetView = nullptr;
 
 HMODULE UI::hCurrentModule = nullptr;
+ImFont* g_TitleFont = nullptr;
+ImFont* g_RegularFont = nullptr;
 
 bool UI::CreateDeviceD3D(HWND hWnd)
 {
@@ -126,9 +128,9 @@ LRESULT WINAPI UI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void UI::Render()
 {
     ImGui_ImplWin32_EnableDpiAwareness();
-    const WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, _T("ImGui Standalone"), nullptr };
+    const WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, _T("Schedule 1 Save Editor"), nullptr };
     ::RegisterClassEx(&wc);
-    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("ImGui Standalone"), WS_OVERLAPPEDWINDOW, 100, 100, 50, 50, NULL, NULL, wc.hInstance, NULL);
+    const HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Schedule 1 Save Editor"), WS_OVERLAPPEDWINDOW, 100, 100, 50, 50, NULL, NULL, wc.hInstance, NULL);
 
     if (!CreateDeviceD3D(hwnd))
     {
@@ -156,8 +158,9 @@ void UI::Render()
         font_regular.FontDataOwnedByAtlas = false;
         font_title.FontDataOwnedByAtlas = false;
         io.Fonts->AddFontFromMemoryTTF(FontJostBold, FontJostSize, 18.0f, &font_regular);
-        io.Fonts->AddFontFromMemoryTTF(FontJostBold, FontJostSize, 24.0f, &font_title);
+        g_TitleFont = io.Fonts->AddFontFromMemoryTTF(FontJostBold, FontJostSize, 20.0f, &font_title);
         io.Fonts->Build();
+
         style.Alpha = 1.0f;
         style.DisabledAlpha = 1.0f;
         style.WindowPadding = ImVec2(12.0f, 12.0f);
