@@ -487,7 +487,7 @@ void Drawing::Draw() {
                 ImGui::Spacing();
                 ImGui::Separator();
                 ImGui::Spacing();
-                if (ImGui::Button("Validate")) {
+                if (ImGui::Button("Continue")) {
                     steamIdValid = ValidateSteamID64(steamIdBuffer);
                     if (steamIdValid) {
                         current_window = 1;
